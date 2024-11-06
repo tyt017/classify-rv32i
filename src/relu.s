@@ -29,7 +29,7 @@ relu:
 
 loop_start:
     # TODO: Add your own implementation
-    blt a1, x0, finish
+    ble a1, x0, finish
     lw t2, 0(a0)
     blt t2, x0, less_than_zero
     sw t2, 0(a0)

@@ -31,7 +31,28 @@ argmax:
     li t2, 1
 loop_start:
     # TODO: Add your own implementation
+    addi t3, x0, -999
+    add t4, x0, x0
+find_max:
+    ble a1, x0, finish
+    lw t0, 0(a0)
+    addi t4, t4, 1
+    bgt t0, t3, change_max
+    addi a1, a1, -1
+    addi a0, a0, 4
+    bge a1, x0, find_max
+
+change_max:
+    add t3, x0, t0
+    addi t1, t4, -1
+    addi a1, a1, -1
+    addi a0, a0, 4
+    bge a1, x0, find_max
 
 handle_error:
     li a0, 36
     j exit
+
+finish:
+    add a0, x0, t1
+    jr ra
