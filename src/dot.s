@@ -63,8 +63,8 @@ product_loop:
     add t4, t4, t2
 
 skip_add:
-    srli t3, t3, 1
     slli t2, t2, 1
+    srli t3, t3, 1
     j product_loop
 
 product_done:
