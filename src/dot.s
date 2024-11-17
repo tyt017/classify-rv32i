@@ -51,28 +51,26 @@ stride_count:
 	slli t5, t5, 2
 	add a1, a1, t5
 
-# initialize t4 as the result of arr0[i] * arr1[i]
 product_start:
 	add t4, x0, x0
 	lw t2, 0(a0) # multiplicand
 	lw t3, 0(a1) # multiplier
-	beqz t3, product_done
 
 product_loop:
-	add t4, t4, t2
-	addi t3, t3, -1
-	bnez t3, product_loop
+	beqz t3, product_done
+    andi t5, t3, 1
+    beq t5, x0, skip_add
+    add t4, t4, t2
+
+skip_add:
+    srli t3, t3, 1
+    slli t2, t2, 1
+    j product_loop
 
 product_done:
-	add t0, t0, t4
-	addi t1, t1, 1
-	j loop_start
-
-multiply:
-	add t4, t4, t2
-	addi t3, t3, -1
-	bgt t3, x0, multiply
-	add t0, t0, t4
+    add t0, t0, t4
+    addi t1, t1, 1
+    j loop_start
 
 loop_end:
     mv a0, t0
