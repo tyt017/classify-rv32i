@@ -212,10 +212,10 @@ mul_start:
     # mul a1, t0, t1 # length of h array and set it as second argument
     # FIXME: Replace 'mul' with your own implementation
     li a1, 0
-mul_start3:
+mul_start1:
     addi t1, t1, -1
     add a1, a1, t0
-    bnez t1, mul_start3
+    bnez t1, mul_start1
     
     jal relu
     
@@ -239,10 +239,10 @@ mul_start3:
     lw t1, 0(s6)
     # mul a0, t0, t1 # FIXME: Replace 'mul' with your own implementation
     li a0, 0
-mul_start1:
+mul_start2:
     addi t1, t1, -1
     add a0, a0, t0
-    bnez t1, mul_start1
+    bnez t1, mul_start2
 
     slli a0, a0, 2
     jal malloc 
@@ -303,13 +303,13 @@ mul_start1:
     mv a0, s10 # load o array into first arg
     lw t0, 0(s3)
     lw t1, 0(s6)
-    mul a1, t0, t1 # load length of array into second arg
+    # mul a1, t0, t1 # load length of array into second arg
     # FIXME: Replace 'mul' with your own implementation
     li a1, 0
-mul_start2:
+mul_start3:
     addi t1, t1, -1
     add a1, a1, t0
-    bnez t1, mul_start2
+    bnez t1, mul_start3
     
     jal argmax
     
