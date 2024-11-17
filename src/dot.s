@@ -51,7 +51,6 @@ stride_count:
 	slli t5, t5, 2
 	add a1, a1, t5
 
-
 # initialize t4 as the result of arr0[i] * arr1[i]
 product_start:
 	add t4, x0, x0
