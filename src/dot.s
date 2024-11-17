@@ -38,46 +38,42 @@ loop_start:
     bge t1, a2, loop_end # loop index comparison
 
     # TODO: Add your own implementation
-	addi t1, t1, 1 # loop index counting
-	# bgt t3, x0, multiply
-	mv t4, t1 # loop index for stride multiply
-	li t5, 0 # product result
-	add t6, a3, x0
-
-stride0_multiply:
-	beqz t4, stride0_done
-	add t5, t5, t6
-	addi t4, t4, -1
-	j stride0_multiply
-
-stride0_done:
-	slli t5, t5, 2 # product * 4
+stride_count:
+	beqz t1, product_start # the first element do not need to count
+	
+	# counting for arr0
+	add t5, x0, a3
+	slli t5, t5, 2
 	add a0, a0, t5
 
-	# initialized for calculating stride1
-	li t5, 0
-	add t4, t4, t1
-
-stride1_multiply:
-	beqz t4, stride1_done
-	add t5, t5, t6
-	addi t4, t4, -1
-	j stride1_multiply
-
-stride1_done:
+	#counting for arr1
+	add t5, x0, a4
 	slli t5, t5, 2
 	add a1, a1, t5
 
-	lw t2, 0(a0) # multiplier
-	lw t3, 0(a1) # multiplicand
-	beqz 
 
+# initialize t4 as the result of arr0[i] * arr1[i]
+product_start:
+	add t4, x0, x0
+	lw t2, 0(a0) # multiplicand
+	lw t3, 0(a1) # multiplier
+	beqz t3, product_done
+
+product_loop:
+	add t4, t4, t2
+	addi t3, t3, -1
+	bnez t3, product_loop
+
+product_done:
+	add t0, t0, t4
+	addi t1, t1, 1
+	j loop_start
 
 multiply:
 	add t4, t4, t2
 	addi t3, t3, -1
 	bgt t3, x0, multiply
-	add a0, a0, t4
+	add t0, t0, t4
 
 loop_end:
     mv a0, t0
