@@ -35,12 +35,43 @@ dot:
     li t1, 0         
 
 loop_start:
-    bge t1, a2, loop_end
+    bge t1, a2, loop_end # loop index comparison
+
     # TODO: Add your own implementation
-	lw t2, 0(a0)
-	lw t3, 0(a1)
-	addi t1, t1, 1
-	bgt t3, x0, multiply
+	addi t1, t1, 1 # loop index counting
+	# bgt t3, x0, multiply
+	mv t4, t1 # loop index for stride multiply
+	li t5, 0 # product result
+	add t6, a3, x0
+
+stride0_multiply:
+	beqz t4, stride0_done
+	add t5, t5, t6
+	addi t4, t4, -1
+	j stride0_multiply
+
+stride0_done:
+	slli t5, t5, 2 # product * 4
+	add a0, a0, t5
+
+	# initialized for calculating stride1
+	li t5, 0
+	add t4, t4, t1
+
+stride1_multiply:
+	beqz t4, stride1_done
+	add t5, t5, t6
+	addi t4, t4, -1
+	j stride1_multiply
+
+stride1_done:
+	slli t5, t5, 2
+	add a1, a1, t5
+
+	lw t2, 0(a0) # multiplier
+	lw t3, 0(a1) # multiplicand
+	beqz 
+
 
 multiply:
 	add t4, t4, t2
