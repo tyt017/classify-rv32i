@@ -1,14 +1,15 @@
 # Assignment 2: Classify
 
+TODO: Add your own descriptions here.
 ## Part A: Mathematical Functions
 
 ### Task 1: ReLU
-#### Description
-Applies ReLU (Rectified Linear Unit) operation in-place: `For each element x in array: x = max(0, x)`
-#### Implementation
-First, check the value is positive or negative. If it is positive, then store the original value. Otherwise, store zero back to the array.
+- #### Description
+    Applies ReLU (Rectified Linear Unit) operation in-place: `For each element x in array: x = max(0, x)`
+- #### Implementation
+    First, check the value is positive or negative. If it is positive, then store the original value. Otherwise, store zero back to the array.
 
-#### modified part:
+- #### modified part:
 ``` assembly= 
 loop_start:
     ble a1, x0, finish
@@ -30,12 +31,12 @@ finish:
 ```
 
 ### Task 2: ArgMax
-#### Description
-Scans an integer array to find its maximum value and returns the position of its first occurrence. In cases where multiple elements share the maximum value, returns the smallest index.
-#### Implementation
-`t3` stores the current max value, and `t1` stores the position of the current max value. When there is a value larger than the current value, it will go to `change_max` tag to change the max value and the position index. Finally, return the position of the max value.
+- #### Description
+    Scans an integer array to find its maximum value and returns the position of its first occurrence. In cases where multiple elements share the maximum value, returns the smallest index.
+- #### Implementation
+    `t3` stores the current max value, and `t1` stores the position of the current max value. When there is a value larger than the current value, it will go to `change_max` tag to change the max value and the position index. Finally, return the position of the max value.
 
-#### modified part:
+- #### modified part:
 ``` assembly=
 loop_start:
     addi t3, x0, -999 # initialized to store the max value
@@ -62,16 +63,16 @@ finish:
 ```
 
 ### Task 3: Dot Product
-#### Description
-Calculates `sum(arr0[i * stride0] * arr1[i * stride1])` where i ranges from 0 to (element_count - 1)
+- #### Description
+    Calculates `sum(arr0[i * stride0] * arr1[i * stride1])` where i ranges from 0 to (element_count - 1)
 I stucked at this task for a while. I originally used the **accumulated** way to calculate multiplication, but when I tested `test_chain`, it would take too much time to execute. As a result, I change to use the **shift_and_add** way to implement multiplication.
-#### Implementation
-1. `stride_count`: Computes the strides length of two arrays.
-2. `product_start`: Load the values from two arrays and initialize the result register `t4`.
-3. `product_loop`: Check the LSB of the mutiplier. If it is zero, go to `skip_add` and left shift the multiplicand `t2`, right shift the multiplier `t3`. Otherwise, add multiplicand to the result register.
-4. `product_done`: the multiplication is completed, and add the result into the dot result register `t0`. Go back to `loop_start` to check if there are some elements not been compute. 
+- #### Implementation
+    1. `stride_count`: Computes the strides length of two arrays.
+    2. `product_start`: Load the values from two arrays and initialize the result register `t4`.
+    3. `product_loop`: Check the LSB of the mutiplier. If it is zero, go to `skip_add` and left shift the multiplicand `t2`, right shift the multiplier `t3`. Otherwise, add multiplicand to the result register.
+    4. `product_done`: the multiplication is completed, and add the result into the dot result register `t0`. Go back to `loop_start` to check if there are some elements not been compute. 
 
-#### modified part:
+- #### modified part:
 ``` assembly=
 loop_start:
     bge t1, a2, loop_end # loop index comparison
@@ -116,31 +117,31 @@ loop_end:
 ```
 
 ### Task 3-2: Matrix Multiplication
-#### Description
-Performs operation: D = Matrix A × Matrix B
+- #### Description
+    Performs operation: D = Matrix A × Matrix B
 Where:
-- Matrix A is a (rows0 × cols0) matrix
-- Matrix B is a (rows1 × cols1) matrix
-- D is a (rows0 × cols1) result matrix
+    - Matrix A is a (rows0 × cols0) matrix
+    - Matrix B is a (rows1 × cols1) matrix
+    - D is a (rows0 × cols1) result matrix
 
-#### Arguments
-- First Matrix (A):
-    - a0: Memory address of first element
-    - a1: Row count
-    - a2: Column count
-- Second Matrix (B):
-    - a3: Memory address of first element
-    - a4: Row count
-    - a5: Column count
-- Output Matrix (D):
-    - a6: Memory address for result storage
+- #### Arguments
+    - First Matrix (A):
+        - a0: Memory address of first element
+        - a1: Row count
+        - a2: Column count
+    - Second Matrix (B):
+        - a3: Memory address of first element
+        - a4: Row count
+        - a5: Column count
+    - Output Matrix (D):
+        - a6: Memory address for result storage
 
-#### Implementation
+- #### Implementation
 To complete this task, it is important to clearly understand the behavior of inner loop and outer loop.
 1. Everytime when the `inner_loop` ended, `s0` was added by 1 to go to the next row. `s3` was added by the number of elements in a row of Matrix A to find the position of the first element in the next row.
 2. When the `outer_loop` finishing, we need to recover the registers that temporarily stored in the stack.
 
-#### modified part:
+- #### modified part:
 ``` assembly=
 inner_loop_end: # update the pointer of Matrix A to the next row
     addi s0, s0, 1 # update the outer_loop counter
@@ -197,7 +198,7 @@ mul_start:
 ```
 
 ### Task 3: Classification
-#### First part
+- #### First part
 ``` assembly=
 # mul a0, t0, t1
 # FIXME: Replace 'mul' with your own implementation
@@ -209,7 +210,7 @@ mul_start:
     add a0, a0, t0
     bnez t1, mul_start
 ```
-#### Second part
+- #### Second part
 ``` assembly=
 # mul a1, t0, t1 # length of h array and set it as second argument
 # FIXME: Replace 'mul' with your own implementation
@@ -221,7 +222,7 @@ mul_start1:
     add a1, a1, t0
     bnez t1, mul_start1
 ```
-#### Third part
+- #### Third part
 ``` assembly=
 # mul a0, t0, t1
 # FIXME: Replace 'mul' with your own implementation
@@ -233,7 +234,7 @@ mul_start2:
     add a0, a0, t0
     bnez t1, mul_start2
 ```
-#### Forth part
+- #### Forth part
 ``` assembly=
 mul a1, t0, t1 # load length of array into second arg
     # FIXME: Replace 'mul' with your own implementation
