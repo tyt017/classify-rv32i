@@ -1,92 +1,113 @@
 # Assignment 2: Classify
 
 TODO: Add your own descriptions here.
-## Part A:
+## Part A: Mathematical Functions
 
 ### Task 1: ReLU
+#### Description
+Applies ReLU (Rectified Linear Unit) operation in-place: `For each element x in array: x = max(0, x)`
+#### Implementation
 First, check the value is positive or negative. If it is positive, then store the original value. Otherwise, store zero back to the array.
 
 #### modified part:
-``` rv32i= 
+``` assembly= 
 loop_start:
     ble a1, x0, finish
     lw t2, 0(a0)
     blt t2, x0, less_than_zero
-    sw t2, 0(a0)
+    sw t2, 0(a0) # store the original value into the array
     addi a1, a1, -1
-    addi a0, a0, 4
+    addi a0, a0, 4 # update the position
     bge a1, x0, loop_start
 
-less_than_zero:
+less_than_zero: # store zero back to the array
     sw x0, 0(a0)
     addi a1, a1, -1
     addi a0, a0, 4
     j loop_start
+    
+finish:
+    jr ra
 ```
 
 ### Task 2: ArgMax
-`t3` stores the current max value, and `t1` stores the position of the current max value. When there is a value larger than the current value, it will go to `change_max` tag to change the max value and the position index.
+#### Description
+Scans an integer array to find its maximum value and returns the position of its first occurrence. In cases where multiple elements share the maximum value, returns the smallest index.
+#### Implementation
+`t3` stores the current max value, and `t1` stores the position of the current max value. When there is a value larger than the current value, it will go to `change_max` tag to change the max value and the position index. Finally, return the position of the max value.
 
 #### modified part:
-``` rv32i=
+``` assembly=
 loop_start:
-    addi t3, x0, -999
-    add t4, x0, x0
+    addi t3, x0, -999 # initialized to store the max value
+    add t4, x0, x0 # loop counter
 find_max:
     ble a1, x0, finish
     lw t0, 0(a0)
     addi t4, t4, 1
     bgt t0, t3, change_max
     addi a1, a1, -1
-    addi a0, a0, 4
+    addi a0, a0, 4 # update the position of the array
     bge a1, x0, find_max
 
-change_max: # change the max value and the max position
+change_max: # change the max value and the position
     add t3, x0, t0
     addi t1, t4, -1
     addi a1, a1, -1
     addi a0, a0, 4
     bge a1, x0, find_max
+    
+finish:
+    add a0, x0, t1
+    jr ra
 ```
 
 ### Task 3: Dot Product
+#### Description
+Calculates `sum(arr0[i * stride0] * arr1[i * stride1])` where i ranges from 0 to (element_count - 1)
 I stucked at this task for a while. I originally used the **accumulated** way to calculate multiplication, but when I tested `test_chain`, it would take too much time to execute. As a result, I change to use the **shift_and_add** way to implement multiplication.
+#### Implementation
+1. `stride_count`: Computes the strides length of two arrays.
+2. `product_start`: Load the values from two arrays and initialize the result register `t4`.
+3. `product_loop`: Check the LSB of the mutiplier. If it is zero, go to `skip_add` and left shift the multiplicand `t2`, right shift the multiplier `t3`. Otherwise, add multiplicand to the result register.
+4. `product_done`: the multiplication is completed, and add the result into the dot result register `t0`. Go back to `loop_start` to check if there are some elements not been compute. 
+
 #### modified part:
-``` rv32i=
+``` assembly=
 loop_start:
     bge t1, a2, loop_end # loop index comparison
 
-stride_count:
-	beqz t1, product_start # the first element do not need to count
+stride_count: # compute the stride of two arrays
+    beqz t1, product_start # the first element do not need to compute
 	
-	# counting for arr0
-	add t5, x0, a3
-	slli t5, t5, 2
-	add a0, a0, t5
+    # computing for arr0
+    add t5, x0, a3
+    slli t5, t5, 2
+    add a0, a0, t5
 
-	#counting for arr1
-	add t5, x0, a4
-	slli t5, t5, 2
-	add a1, a1, t5
+    #computing for arr1
+    add t5, x0, a4
+    slli t5, t5, 2
+    add a1, a1, t5
 
 product_start:
-	add t4, x0, x0
-	lw t2, 0(a0) # multiplicand
-	lw t3, 0(a1) # multiplier
+    add t4, x0, x0 # initialized to store the product
+    lw t2, 0(a0) # multiplicand
+    lw t3, 0(a1) # multiplier
 
 product_loop:
-	beqz t3, product_done
-    andi t5, t3, 1
+    beqz t3, product_done
+    andi t5, t3, 1 # get the LSB of the multiplier
     beq t5, x0, skip_add
     add t4, t4, t2
 
-skip_add:
+skip_add: # the LSB of the multiplier is zero
     slli t2, t2, 1
     srli t3, t3, 1
     j product_loop
 
 product_done:
-    add t0, t0, t4
+    add t0, t0, t4 # add the product into the dot result
     addi t1, t1, 1
     j loop_start
 
@@ -96,22 +117,42 @@ loop_end:
 ```
 
 ### Task 3-2: Matrix Multiplication
+#### Description
+Performs operation: D = Matrix A × Matrix B
+Where:
+- Matrix A is a (rows0 × cols0) matrix
+- Matrix B is a (rows1 × cols1) matrix
+- D is a (rows0 × cols1) result matrix
+
+#### Arguments
+- First Matrix (A):
+    - a0: Memory address of first element
+    - a1: Row count
+    - a2: Column count
+- Second Matrix (B):
+    - a3: Memory address of first element
+    - a4: Row count
+    - a5: Column count
+- Output Matrix (D):
+    - a6: Memory address for result storage
+
+#### Implementation
 To complete this task, it is important to clearly understand the behavior of inner loop and outer loop.
-Everytime when the inner_loop ended, `s0` needed to be added by 1 to calculate the next row. `s3` needed to add the number of the column in Matrix A to find the position of the first element in the next row.
-When the outer_loop finishing, we need to recover the registers that temporarily stored in the stack.
+1. Everytime when the `inner_loop` ended, `s0` was added by 1 to go to the next row. `s3` was added by the number of elements in a row of Matrix A to find the position of the first element in the next row.
+2. When the `outer_loop` finishing, we need to recover the registers that temporarily stored in the stack.
 
 #### modified part:
-``` rv32i=
-inner_loop_end:
-    addi s0, s0, 1
-    add t0, x0, a2
-    slli t0, t0, 2
+``` assembly=
+inner_loop_end: # update the pointer of Matrix A to the next row
+    addi s0, s0, 1 # update the outer_loop counter
+    add t0, x0, a2 # the number of elements in each row
+    slli t0, t0, 2 # multiplied by 4
     add s3, s3, t0
 
     j outer_loop_start
 
 
-outer_loop_end:
+outer_loop_end: # recover the registers and return control to the caller
 
     lw ra, 0(sp)
     lw s0, 4(sp)
@@ -125,12 +166,13 @@ outer_loop_end:
     jr ra
 ```
 
-## Part B:
+## Part B: File Operations and Main
 
 In this part, we only have to modify the `mul` function in the three tasks.
+I use the **accumulate** way to implement the multiplication.
 
 ### Task 1: Read Matrix
-``` rv32i=
+``` assembly=
 # mul s1, t1, t2   # s1 is number of elements
 # FIXME: Replace 'mul' with your own implementation
 
@@ -143,7 +185,7 @@ mul_start:
 ```
 
 ### Task 2: Write Matrix
-``` rv32i=
+``` assembly=
 # mul s4, s2, s3   # s4 = total elements
 # FIXME: Replace 'mul' with your own implementation
 
@@ -157,7 +199,7 @@ mul_start:
 
 ### Task 3: Classification
 #### First part
-``` rv32i=
+``` assembly=
 # mul a0, t0, t1
 # FIXME: Replace 'mul' with your own implementation
 
@@ -169,7 +211,7 @@ mul_start:
     bnez t1, mul_start
 ```
 #### Second part
-``` rv32i=
+``` assembly=
 # mul a1, t0, t1 # length of h array and set it as second argument
 # FIXME: Replace 'mul' with your own implementation
 
@@ -181,7 +223,7 @@ mul_start1:
     bnez t1, mul_start1
 ```
 #### Third part
-``` rv32i=
+``` assembly=
 # mul a0, t0, t1
 # FIXME: Replace 'mul' with your own implementation
 
@@ -193,9 +235,11 @@ mul_start2:
     bnez t1, mul_start2
 ```
 #### Forth part
-``` rv32i=
+``` assembly=
 mul a1, t0, t1 # load length of array into second arg
     # FIXME: Replace 'mul' with your own implementation
+    
+# my implementation
     li a1, 0
 mul_start3:
     addi t1, t1, -1
