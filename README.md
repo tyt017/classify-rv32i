@@ -137,9 +137,9 @@ Where:
         - a6: Memory address for result storage
 
 - #### Implementation
-To complete this task, it is important to clearly understand the behavior of inner loop and outer loop.
-1. Everytime when the `inner_loop` ended, `s0` was added by 1 to go to the next row. `s3` was added by the number of elements in a row of Matrix A to find the position of the first element in the next row.
-2. When the `outer_loop` finishing, we need to recover the registers that temporarily stored in the stack.
+    To complete this task, it is important to clearly understand the behavior of inner loop and outer loop.
+    1. Everytime when the `inner_loop` ended, `s0` was added by 1 to go to the next row. `s3` was added by the number of elements in a row of Matrix A to find the position of the first element in the next row.
+    2. When the `outer_loop` finishing, we need to recover the registers that temporarily stored in the stack.
 
 - #### modified part:
 ``` assembly=
